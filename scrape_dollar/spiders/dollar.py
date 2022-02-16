@@ -8,13 +8,13 @@ class DollarSpider(scrapy.Spider):
 
     def parse(self, response):
         casas_de_cambio = response.xpath(
-            '//div[3]/section/div[1]/div[4]/div[1]/div/div/div[1]'
+            '/html/body/div[3]/section/div[1]/div[4]/div[1]/div[2]/div'
         )
 
         for box in casas_de_cambio:
             yield dict(
                 name=box.xpath('.//h3/a/text()').get(),
                 url=box.xpath('.//h3/a/@href').get(),
-                compra=box.xpath('.//div[2]/text()').get(),
-                venta=box.xpath('.//div[3]/text()').get(),
+                compra=box.xpath('./div[1]/div[2]/text()').get().strip(),
+                venta=box.xpath('./div[1]/div[3]/text()').get().strip(),
             )
