@@ -1,4 +1,4 @@
-from scrape_dollar.dollar import Exchange, get_all_exchanges
+from dollar_price.dollar import Exchange, get_all_exchanges
 
 
 def test_get_all_exchanges():
