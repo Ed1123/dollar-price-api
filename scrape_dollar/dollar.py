@@ -3,6 +3,8 @@ from dataclasses import dataclass
 import requests
 from parsel import Selector
 
+URL = 'https://cuantoestaeldolar.pe/'
+
 
 @dataclass
 class Exchange:
@@ -13,8 +15,7 @@ class Exchange:
 
 
 def get_html() -> str:
-    url = 'https://cuantoestaeldolar.pe/'
-    return requests.get(url).text
+    return requests.get(URL).text
 
 
 class Parser:
