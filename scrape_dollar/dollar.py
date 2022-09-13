@@ -44,7 +44,8 @@ class Parser:
 
     @staticmethod
     def get_url(selector: Selector) -> str:
-        return selector.xpath('.//h3/a/@href').get()  # type: ignore
+        url = str(selector.xpath('.//h3/a/@href').get())  # type: ignore
+        return ''.join(url.split('?')[:-1])
 
     @staticmethod
     def get_price(selector: Selector, xpath: str) -> float:
