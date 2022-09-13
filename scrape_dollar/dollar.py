@@ -13,12 +13,17 @@ class Exchange:
     buy_price: float
     sell_price: float
 
+    def __repr__(self) -> str:
+        return f'({self.exchange_name}, buy: {self.buy_price}, sell: {self.sell_price}, {self.url})'
+
 
 def get_html() -> str:
     return requests.get(URL).text
 
 
 class Parser:
+    '''Class with all the logic for parsing the html.'''
+
     def __init__(self, html: str) -> None:
         self.selector = Selector(html)
 
