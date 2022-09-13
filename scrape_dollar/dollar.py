@@ -63,9 +63,13 @@ class Parser:
         return self.get_price(selector, './div[1]/div[3]/text()')
 
 
-def main():
+def get_all_exchanges() -> list[Exchange]:
     parser = Parser(get_html())
-    print(parser.parse())
+    return parser.parse()
+
+
+def main():
+    print(get_all_exchanges())
 
 
 if __name__ == '__main__':
