@@ -2,3 +2,4 @@ __pycache__
 dollar.csv
 venv
 .vscode
+.pytest_cache
