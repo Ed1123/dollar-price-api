@@ -10,7 +10,7 @@ pip install -r requirements.txt
 
 ## Usage
 ```bash
-python3 dollar_price/dollar.py
+python3 -m dollar_price
 ```
 
 ## Test
