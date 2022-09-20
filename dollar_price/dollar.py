@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 
 import requests
@@ -29,38 +30,37 @@ class Parser:
 
     def parse(self) -> list[Exchange]:
         '''Parse the html and get a list of Exchanges'''
-        exchanges = self.selector.xpath(
-            '/html/body/div[3]/section/div[1]/div[3]/div[1]/div/div'
-        )
+        json_text = self.selector.xpath('//*[@id="__NEXT_DATA__"]/text()').get()
+        if json_text is None:
+            raise Exception('No json found in website.')
+        data = json.loads(json_text)
+        exchange_houses = data['props']['pageProps']['onlineExchangeHouses']
         return [
             Exchange(
-                self.get_name(exchange_row),
-                self.get_url(exchange_row),
-                self.get_buy_price(exchange_row),
-                self.get_sell_price(exchange_row),
+                self.get_name(exchange_house),
+                self.get_url(exchange_house),
+                self.get_buy_price(exchange_house),
+                self.get_sell_price(exchange_house),
             )
-            for exchange_row in exchanges
-            if 'header' not in exchange_row.xpath('./@class').get()
+            for exchange_house in exchange_houses
         ]
 
     @staticmethod
-    def get_name(selector: Selector) -> str:
-        return selector.xpath('.//h3/a/text()').get()  # type: ignore
+    def get_name(exchange_data: dict) -> str:
+        return exchange_data['title']
 
     @staticmethod
-    def get_url(selector: Selector) -> str:
-        url = str(selector.xpath('.//h3/a/@href').get())  # type: ignore
+    def get_url(exchange_data: dict) -> str:
+        url = exchange_data['site']
         return ''.join(url.split('?')[:-1])
 
     @staticmethod
-    def get_price(selector: Selector, xpath: str) -> float:
-        return float(selector.xpath(xpath).get().strip())  # type: ignore
+    def get_buy_price(exchange_data: dict) -> float:
+        return float(exchange_data['rates']['buy']['cost'])
 
-    def get_buy_price(self, selector: Selector) -> float:
-        return self.get_price(selector, './div[1]/div[2]/text()')
-
-    def get_sell_price(self, selector: Selector) -> float:
-        return self.get_price(selector, './div[1]/div[3]/text()')
+    @staticmethod
+    def get_sell_price(exchange_data: dict) -> float:
+        return float(exchange_data['rates']['buy']['cost'])
 
 
 def get_all_exchanges() -> list[Exchange]:
