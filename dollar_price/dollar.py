@@ -60,7 +60,7 @@ class Parser:
 
     @staticmethod
     def get_sell_price(exchange_data: dict) -> float:
-        return float(exchange_data['rates']['buy']['cost'])
+        return float(exchange_data['rates']['sale']['cost'])
 
 
 def get_all_exchanges() -> list[Exchange]:
