@@ -3,3 +3,4 @@ dollar.csv
 venv
 .vscode
 .pytest_cache
+.deta
