@@ -25,3 +25,19 @@ python3 -m dollar_price
 ```bash
 pytest
 ```
+
+## Deploy with deta.sh
+1. Create a deta account in https://web.deta.sh/
+2. Install deta with:
+```bash
+curl -fsSL https://get.deta.dev/cli.sh | sh
+```
+3. Login through the terminal
+```bash
+deta login
+```
+4. Create a project in the deta website
+5. Deploy with
+```bash
+deta new --python --name dollar-api .
+```
