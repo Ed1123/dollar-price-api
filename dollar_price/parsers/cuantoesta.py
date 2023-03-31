@@ -1,6 +1,6 @@
 import json
 
-import requests
+from httpx import AsyncClient
 from parsel import Selector
 
 from dollar_price.models import Exchange
@@ -8,8 +8,10 @@ from dollar_price.models import Exchange
 URL = 'https://cuantoestaeldolar.pe/'
 
 
-def get_html() -> str:
-    return requests.get(URL).text
+async def get_html() -> str:
+    async with AsyncClient() as client:
+        response = await client.get(URL)
+        return response.text
 
 
 class Parser:
@@ -53,6 +55,6 @@ class Parser:
         return float(exchange_data['rates']['sale']['cost'])
 
 
-def get_cuantoesta_rates() -> list[Exchange]:
-    parser = Parser(get_html())
+async def get_cuantoesta_rates() -> list[Exchange]:
+    parser = Parser(await get_html())
     return parser.parse()
