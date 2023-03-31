@@ -21,5 +21,5 @@ async def root():
 
 
 @app.get("/rates", response_model=list[Exchange])
-def read_exchange_rates() -> list[Exchange]:
-    return get_all_exchanges()
+async def read_exchange_rates() -> list[Exchange]:
+    return await get_all_exchanges()
