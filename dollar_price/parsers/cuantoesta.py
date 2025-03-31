@@ -1,5 +1,6 @@
 import json
 
+from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 from parsel import Selector
 
@@ -22,11 +23,18 @@ class Parser:
 
     def parse(self) -> list[Exchange]:
         '''Parse the html and get a list of Exchanges'''
-        json_text = self.selector.xpath('//*[@id="__NEXT_DATA__"]/text()').get()
-        if json_text is None:
-            raise Exception('No json found in website.')
+        script_tag = self.selector.css('body > script:nth-child(20)').get()
+        if script_tag is None:
+            raise Exception('Missing script tag with JSON in the HTML')
+
+        json_text = script_tag.lstrip(
+            '<script>self.__next_f.push([1, "d:[\\"$\",\\"$L17\\",null,'
+        ).rstrip(']\\n"])</script>')
+        json_text = json_text.encode('utf-8').decode(
+            'unicode_escape'
+        )  # removing escape characters
         data = json.loads(json_text)
-        exchange_houses = data['props']['pageProps']['onlineExchangeHouses']
+        exchange_houses = data['exchangeHouses']
         return [
             Exchange(
                 self.get_name(exchange_house),
@@ -35,6 +43,7 @@ class Parser:
                 self.get_sell_price(exchange_house),
             )
             for exchange_house in exchange_houses
+            if 'cost' in exchange_house['rates']['buy']
         ]
 
     @staticmethod
@@ -48,11 +57,17 @@ class Parser:
 
     @staticmethod
     def get_buy_price(exchange_data: dict) -> float:
-        return float(exchange_data['rates']['buy']['cost'])
+        rate = exchange_data['rates']['buy']['cost']
+        if rate == '':
+            return 0.0
+        return float(rate)
 
     @staticmethod
     def get_sell_price(exchange_data: dict) -> float:
-        return float(exchange_data['rates']['sale']['cost'])
+        rate = exchange_data['rates']['sale']['cost']
+        if rate == '':
+            return 0.0
+        return float(rate)
 
 
 async def get_cuantoesta_rates() -> list[Exchange]:
