@@ -1,6 +1,5 @@
 import json
 
-from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 from parsel import Selector
 
@@ -23,49 +22,47 @@ class Parser:
 
     def parse(self) -> list[Exchange]:
         '''Parse the html and get a list of Exchanges'''
-        script_tag = self.selector.css('body > script:nth-child(20)').get()
-        if script_tag is None:
-            raise Exception('Missing script tag with JSON in the HTML')
-
-        json_text = script_tag.lstrip(
-            '<script>self.__next_f.push([1, "d:[\\"$\",\\"$L17\\",null,'
-        ).rstrip(']\\n"])</script>')
-        json_text = json_text.encode('utf-8').decode(
-            'unicode_escape'
-        )  # removing escape characters
-        data = json.loads(json_text)
-        exchange_houses = data['exchangeHouses']
-        return [
+        exchange_divs = self.selector.css(
+            'main > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) >'
+            'div:nth-child(1) > div:nth-child(n+3):nth-child(-n+4) >'
+            'div:nth-child(2) > div > div'
+        )
+        exchanges = [
             Exchange(
-                self.get_name(exchange_house),
-                self.get_url(exchange_house),
-                self.get_buy_price(exchange_house),
-                self.get_sell_price(exchange_house),
+                exchange_name=self.get_name(exchange_div),
+                buy_price=self.get_buy_price(exchange_div),
+                sell_price=self.get_sell_price(exchange_div),
+                url=self.get_url(exchange_div),
             )
-            for exchange_house in exchange_houses
-            if 'cost' in exchange_house['rates']['buy']
+            for exchange_div in exchange_divs
         ]
+        return exchanges
 
     @staticmethod
-    def get_name(exchange_data: dict) -> str:
-        return exchange_data['title']
+    def get_name(exchange_selector: Selector) -> str:
+        name = exchange_selector.css('img::attr(alt)').get()
+        if name is None:
+            return ''
+        return name
 
     @staticmethod
-    def get_url(exchange_data: dict) -> str:
-        url = exchange_data['site']
-        return ''.join(url.split('?')[:-1])
+    def get_url(exchange_selector: Selector) -> str:
+        url = exchange_selector.css('a::attr(href)').get()
+        if url is None:
+            return ''
+        return url.split('?')[0]
 
     @staticmethod
-    def get_buy_price(exchange_data: dict) -> float:
-        rate = exchange_data['rates']['buy']['cost']
-        if rate == '':
+    def get_buy_price(exchange_selector: Selector) -> float:
+        rate = exchange_selector.css('div > p::text').getall()[0]
+        if rate is None:
             return 0.0
         return float(rate)
 
     @staticmethod
-    def get_sell_price(exchange_data: dict) -> float:
-        rate = exchange_data['rates']['sale']['cost']
-        if rate == '':
+    def get_sell_price(exchange_selector: Selector) -> float:
+        rate = exchange_selector.css('div > p::text').getall()[2]
+        if rate is None:
             return 0.0
         return float(rate)
 
