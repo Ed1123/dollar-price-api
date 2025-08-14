@@ -1,4 +1,6 @@
 import json
+import re
+from urllib.parse import unquote
 
 from httpx import AsyncClient
 from parsel import Selector
@@ -44,7 +46,12 @@ class Parser:
         icon = exchange_selector.css('img::attr(src)').get()
         if icon is None:
             return ''
-        return icon.split('?')[0]
+        if icon.startswith('/_next/image'):
+            match = re.search(r'url=(http.+\.\w+)', icon)
+            if match is None:
+                return ''
+            return unquote(match.group(1))
+        return icon
 
     @staticmethod
     def get_name(exchange_selector: Selector) -> str:
