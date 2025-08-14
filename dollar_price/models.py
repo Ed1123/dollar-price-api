@@ -7,6 +7,7 @@ class Exchange:
     url: str
     buy_price: float
     sell_price: float
+    icon: str
 
     def __repr__(self) -> str:
         return f'({self.exchange_name}, buy: {self.buy_price}, sell: {self.sell_price}, {self.url})'

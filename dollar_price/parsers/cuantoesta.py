@@ -33,10 +33,18 @@ class Parser:
                 buy_price=self.get_buy_price(exchange_div),
                 sell_price=self.get_sell_price(exchange_div),
                 url=self.get_url(exchange_div),
+                icon=self.get_icon(exchange_div),
             )
             for exchange_div in exchange_divs
         ]
         return exchanges
+
+    @staticmethod
+    def get_icon(exchange_selector: Selector) -> str:
+        icon = exchange_selector.css('img::attr(src)').get()
+        if icon is None:
+            return ''
+        return icon.split('?')[0]
 
     @staticmethod
     def get_name(exchange_selector: Selector) -> str:

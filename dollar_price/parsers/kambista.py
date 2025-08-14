@@ -16,6 +16,7 @@ async def get_kambista_rate() -> Exchange:
         url='https://kambista.com/',
         buy_price=data['bid'],
         sell_price=data['ask'],
+        icon='https://neocdn.kambista.com/wp-content/uploads/2024/12/logo.svg',
     )
 
 
